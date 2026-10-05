@@ -7,7 +7,7 @@ import apiRouter from './routes';
 
 const app = express();
 
-// Security headers
+// Cấu hình các tiêu đề bảo mật (Security headers)
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
@@ -16,37 +16,37 @@ app.use(
   })
 );
 
-// CORS configuration
+// Cấu hình CORS cho phép truy cập liên tên miền
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or postman)
+      // Cho phép các yêu cầu không có origin (ví dụ: ứng dụng di động, curl, postman)
       if (!origin) return callback(null, true);
       if (origin === env.CLIENT_URL || origin.startsWith('http://localhost:')) {
         return callback(null, true);
       }
-      return callback(null, true); // Dev flexible origin
+      return callback(null, true); // Môi trường phát triển: linh hoạt chấp nhận các origin kết nối
     },
     credentials: true,
   })
 );
 
-// Body parsers
+// Middleware xử lý và phân tích cú pháp body dữ liệu gửi lên
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Apply rate limiting to all requests
+// Áp dụng giới hạn tần suất gửi yêu cầu (Rate limiting) cho toàn bộ API
 app.use(generalLimiter);
 
-// Health check
+// API kiểm tra tình trạng hoạt động của hệ thống (Health check)
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date() });
 });
 
-// API Routes
+// Định tuyến các API chính
 app.use('/api', apiRouter);
 
-// Centralized error handler
+// Middleware xử lý lỗi tập trung
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Unhandled Server Error:', err);
 

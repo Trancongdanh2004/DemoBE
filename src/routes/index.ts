@@ -21,7 +21,7 @@ import { uploadLimiter } from '../middlewares/rateLimiter';
 
 const router = Router();
 
-// ================= PUBLIC USER ROUTES =================
+// ================= CÁC TUYẾN ĐƯỜNG CÔNG KHAI (NGƯỜI DÙNG) =================
 router.get('/years', getYears);
 router.get('/years/:yearId/folders', getYearFolders);
 router.get('/folders/:folderId', getFolderDetail);
@@ -35,10 +35,10 @@ router.post(
 router.get('/files/:id/download', downloadFile);
 router.get('/files/:id/view', viewFile);
 
-// ================= ADMIN AUTH ROUTE =================
+// ================= TUYẾN ĐƯỜNG XÁC THỰC QUẢN TRỊ VIÊN =================
 router.post('/admin/login', adminLogin);
 
-// ================= ADMIN PROTECTED ROUTES =================
+// ================= CÁC TUYẾN ĐƯỜNG BẢO VỆ CHO QUẢN TRỊ VIÊN =================
 router.use('/admin', authMiddleware);
 
 router.get('/admin/files', getAdminFiles);

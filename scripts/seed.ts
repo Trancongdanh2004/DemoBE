@@ -31,7 +31,7 @@ async function runSeed() {
     const folderIds: { id: string; name: string; year: number }[] = [];
 
     for (const year of years) {
-      // Upsert year
+      // Cập nhật hoặc thêm mới năm (upsert year)
       const yearRes = await client.query(
         `INSERT INTO years (id, year)
          VALUES (COALESCE((SELECT id FROM years WHERE year = $1), gen_random_uuid()), $1)
@@ -55,7 +55,7 @@ async function runSeed() {
 
     console.log(`✅ Seeded ${years.length} years and ${folderIds.length} folders.`);
 
-    // Check if --with-files flag is provided
+    // Kiểm tra xem có truyền cờ --with-files hay không
     const withFiles = process.argv.includes('--with-files');
     if (withFiles && folderIds.length > 0) {
       console.log('📄 Seeding 50 sample files for testing pagination...');

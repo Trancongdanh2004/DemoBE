@@ -43,7 +43,7 @@ async function main() {
 
   console.log(`✅ Seeded ${years.length} years and ${createdFolders.length} folders.`);
 
-  // Check if --with-files flag is passed
+  // Kiểm tra xem có truyền cờ --with-files hay không
   const withFiles = process.argv.includes('--with-files');
   if (withFiles && createdFolders.length > 0) {
     console.log('📄 Seeding 50 sample files for testing pagination...');

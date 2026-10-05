@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env file (if present locally)
+// Tải tệp cấu hình .env (nếu có ở môi trường cục bộ)
 dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 

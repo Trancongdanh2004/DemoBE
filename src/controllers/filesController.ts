@@ -69,7 +69,7 @@ export async function getFolderFiles(req: Request, res: Response): Promise<void>
 export async function uploadFiles(req: Request, res: Response): Promise<void> {
   const { folderId } = req.params;
 
-  // 1. Validate body schema
+  // 1. Kiểm tra tính hợp lệ của dữ liệu gửi lên (body schema)
   const parsed = uploaderSchema.safeParse(req.body);
   if (!parsed.success) {
     const errorMsg = parsed.error.errors.map((e) => e.message).join(', ');
@@ -79,7 +79,7 @@ export async function uploadFiles(req: Request, res: Response): Promise<void> {
 
   const { uploaderName, uploaderUnit } = parsed.data;
 
-  // 2. Validate folder existence and obtain year
+  // 2. Kiểm tra sự tồn tại của thư mục và lấy thông tin năm tương ứng
   try {
     const folder = await prisma.folder.findUnique({
       where: { id: folderId },
@@ -93,7 +93,7 @@ export async function uploadFiles(req: Request, res: Response): Promise<void> {
 
     const folderYear = folder.year.year;
 
-    // 3. Check uploaded files
+    // 3. Kiểm tra danh sách các tệp tin được tải lên
     const files = (req.files as Express.Multer.File[]) || [];
     if (!files || files.length === 0) {
       res.status(400).json({ message: 'Vui lòng chọn ít nhất một tệp tin để tải lên' });
@@ -112,11 +112,11 @@ export async function uploadFiles(req: Request, res: Response): Promise<void> {
       file?: any;
     }> = [];
 
-    // 4. Process each file independently
+    // 4. Xử lý độc lập từng tệp tin
     for (const file of files) {
       const fixedName = fixUtf8FileName(file.originalname);
 
-      // Validate size (10 MB)
+      // Kiểm tra dung lượng tệp (tối đa 10 MB)
       if (file.size > 10 * 1024 * 1024) {
         results.push({
           originalName: fixedName,
@@ -126,7 +126,7 @@ export async function uploadFiles(req: Request, res: Response): Promise<void> {
         continue;
       }
 
-      // Validate magic bytes, mime, extension
+      // Kiểm tra magic bytes, mime type và phần mở rộng của tệp
       const validation = validateFile(file.buffer, fixedName, file.mimetype);
       if (!validation.isValid || !validation.fileType || !validation.extension) {
         results.push({
@@ -137,7 +137,7 @@ export async function uploadFiles(req: Request, res: Response): Promise<void> {
         continue;
       }
 
-      // Upload to Cloudinary using upload_stream
+      // Tải tệp lên Cloudinary thông qua luồng upload_stream
       const ext = validation.extension;
       const fileId = randomUUID();
       const publicIdWithExt = `${fileId}${ext}`;
@@ -172,7 +172,7 @@ export async function uploadFiles(req: Request, res: Response): Promise<void> {
         continue;
       }
 
-      // Insert file record into DB via Prisma
+      // Lưu bản ghi thông tin tệp vào cơ sở dữ liệu qua Prisma
       try {
         const createdFile = await prisma.file.create({
           data: {
@@ -301,7 +301,7 @@ export async function downloadFile(req: Request, res: Response): Promise<void> {
       `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`
     );
 
-    // If real Cloudinary upload, fetch and stream it
+    // Nếu là tệp thực tế trên Cloudinary, tải về và truyền luồng dữ liệu trả về cho client
     if (file.cloudinaryUrl && !file.cloudinaryUrl.includes('/demo/raw/upload/v1/')) {
       try {
         const response = await fetch(file.cloudinaryUrl);
@@ -315,7 +315,7 @@ export async function downloadFile(req: Request, res: Response): Promise<void> {
       }
     }
 
-    // Fallback document generation for seed/sample files or unreachable upstream
+    // Tạo tài liệu dự phòng cho dữ liệu mẫu (seed/sample) hoặc khi không kết nối được upstream Cloudinary
     const uploadDateStr = file.uploadedAt.toISOString();
     if (file.fileType === 'pdf') {
       const pdfBuf = generateFallbackPdf(file.originalName, file.uploaderName, uploadDateStr);
@@ -352,7 +352,7 @@ export async function viewFile(req: Request, res: Response): Promise<void> {
     );
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
-    // If real Cloudinary upload, fetch and stream it
+    // Nếu là tệp thực tế trên Cloudinary, tải về và truyền luồng dữ liệu xem trước
     if (file.cloudinaryUrl && !file.cloudinaryUrl.includes('/demo/raw/upload/v1/')) {
       try {
         const response = await fetch(file.cloudinaryUrl);
@@ -366,7 +366,7 @@ export async function viewFile(req: Request, res: Response): Promise<void> {
       }
     }
 
-    // Fallback for preview
+    // Tạo nội dung tài liệu mẫu dự phòng để xem trước
     const uploadDateStr = file.uploadedAt.toISOString();
     if (file.fileType === 'pdf') {
       const pdfBuf = generateFallbackPdf(file.originalName, file.uploaderName, uploadDateStr);

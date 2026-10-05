@@ -1,12 +1,12 @@
 import multer from 'multer';
 
-// Storage in memory as Buffers so we can validate magic bytes and stream to Cloudinary
+// Lưu trữ tạm trong bộ nhớ (memory Buffer) để kiểm tra magic bytes và truyền luồng lên Cloudinary
 const storage = multer.memoryStorage();
 
 export const uploadMiddleware = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB max per file
-    files: 10, // 10 files max per batch
+    fileSize: 10 * 1024 * 1024, // Tối đa 10 MB cho mỗi tệp tin
+    files: 10, // Tối đa 10 tệp tin cho mỗi lần tải lên
   },
 });

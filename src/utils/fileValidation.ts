@@ -32,7 +32,7 @@ const OLE_HEADER = Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1])
 export function fixUtf8FileName(str: string): string {
   try {
     const converted = Buffer.from(str, 'latin1').toString('utf8');
-    // If the converted string contains valid characters, return it
+    // Nếu chuỗi đã chuyển đổi chứa các ký tự hợp lệ thì trả về kết quả
     return converted;
   } catch {
     return str;
@@ -46,7 +46,7 @@ export function validateFile(
 ): ValidationResult {
   const ext = path.extname(originalName).toLowerCase();
 
-  // 1. Check extension
+  // 1. Kiểm tra phần mở rộng của tệp
   if (!ALLOWED_EXTENSIONS.includes(ext)) {
     return {
       isValid: false,
@@ -54,7 +54,7 @@ export function validateFile(
     };
   }
 
-  // 2. Map extension to file_type enum
+  // 2. Ánh xạ phần mở rộng sang loại tệp tương ứng (pdf, word, excel)
   let fileType: FileType;
   if (ext === '.pdf') {
     fileType = 'pdf';
@@ -64,7 +64,7 @@ export function validateFile(
     fileType = 'excel';
   }
 
-  // 3. Verify reported MIME
+  // 3. Xác thực loại MIME được gửi lên
   const allowedMimes = MIME_MAP[ext] || [];
   const normalizedMime = reportedMime.toLowerCase();
   const isMimeValid =
@@ -80,7 +80,7 @@ export function validateFile(
     };
   }
 
-  // 4. Magic Bytes Validation
+  // 4. Kiểm tra mã nhận dạng nhị phân đầu tệp (Magic Bytes)
   if (buffer.length < 4) {
     return {
       isValid: false,
@@ -89,7 +89,7 @@ export function validateFile(
   }
 
   if (ext === '.pdf') {
-    // PDF starts with %PDF- (0x25 0x50 0x44 0x46 0x2D)
+    // Tệp PDF luôn bắt đầu bằng chuỗi %PDF- (0x25 0x50 0x44 0x46 0x2D)
     const pdfHeader = buffer.subarray(0, 5).toString('ascii');
     if (!pdfHeader.startsWith('%PDF-')) {
       return {
@@ -98,7 +98,7 @@ export function validateFile(
       };
     }
   } else if (ext === '.docx' || ext === '.xlsx') {
-    // Modern Office XML files are ZIP archives starting with "PK" (0x50 0x4B)
+    // Các tệp Office OpenXML hiện đại là các gói lưu trữ ZIP bắt đầu bằng ký tự "PK" (0x50 0x4B)
     if (buffer[0] !== 0x50 || buffer[1] !== 0x4b) {
       return {
         isValid: false,
@@ -106,7 +106,7 @@ export function validateFile(
       };
     }
   } else if (ext === '.doc' || ext === '.xls') {
-    // Legacy Office files are OLE Compound Files: D0 CF 11 E0 A1 B1 1A E1
+    // Các tệp Office định dạng cũ thuộc dạng OLE Compound: D0 CF 11 E0 A1 B1 1A E1
     if (buffer.length < 8 || !buffer.subarray(0, 8).equals(OLE_HEADER)) {
       return {
         isValid: false,

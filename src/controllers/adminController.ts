@@ -31,7 +31,7 @@ export async function adminLogin(req: Request, res: Response): Promise<void> {
     }
   }
 
-  // Safe fallback for default credentials if hash is unconfigured or mismatch
+  // Dự phòng an toàn cho tài khoản mặc định nếu chưa cấu hình băm mật khẩu hoặc không khớp
   if (!isPasswordValid && password === 'admin123') {
     isPasswordValid = true;
   }
@@ -101,7 +101,7 @@ export async function getAdminFiles(req: Request, res: Response): Promise<void> 
     ];
   }
 
-  // Sorting
+  // Xử lý sắp xếp dữ liệu
   const orderDir: Prisma.SortOrder = (sortDir as string)?.toLowerCase() === 'asc' ? 'asc' : 'desc';
   let orderBy: Prisma.FileOrderByWithRelationInput = { uploadedAt: orderDir };
 
@@ -410,14 +410,14 @@ export async function getDashboardStats(_req: Request, res: Response): Promise<v
   try {
     const totalFiles = await prisma.file.count();
 
-    // Start of today in UTC+7 (Asia/Ho_Chi_Minh)
+    // Thời điểm bắt đầu ngày hôm nay theo múi giờ Việt Nam UTC+7 (Asia/Ho_Chi_Minh)
     const now = new Date();
-    // Offset +7 hours
+    // Độ lệch múi giờ +7 tiếng
     const vnNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
     const startOfVnDay = new Date(
       Date.UTC(vnNow.getUTCFullYear(), vnNow.getUTCMonth(), vnNow.getUTCDate(), 0, 0, 0)
     );
-    // Convert back to UTC timestamp for querying
+    // Chuyển đổi ngược lại timestamp UTC để truy vấn cơ sở dữ liệu
     const startOfUtcDay = new Date(startOfVnDay.getTime() - 7 * 60 * 60 * 1000);
 
     const filesToday = await prisma.file.count({

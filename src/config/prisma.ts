@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-// Support BigInt serialization in JSON (e.g. for sizeBytes)
+// Hỗ trợ tuần tự hóa BigInt sang JSON (ví dụ: cho trường dung lượng sizeBytes)
 (BigInt.prototype as any).toJSON = function () {
   return Number(this);
 };
