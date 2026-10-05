@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env file
+// Load .env file (if present locally)
+dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export const env = {
