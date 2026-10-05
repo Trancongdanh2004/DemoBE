@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FileType {
+  pdf
+  word
+  excel
+
+  @@map("file_type")
+}
+
+model Year {
+  id        String   @id @default(uuid()) @db.Uuid
+  year      Int      @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  folders   Folder[]
+
+  @@map("years")
+}
+
+model Folder {
+  id        String   @id @default(uuid()) @db.Uuid
+  yearId    String   @map("year_id") @db.Uuid
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  year      Year     @relation(fields: [yearId], references: [id], onDelete: Cascade)
+  files     File[]
+
+  @@unique([yearId, name])
+  @@index([yearId])
+  @@map("folders")
+}
+
+model File {
+  id                 String   @id @default(uuid()) @db.Uuid
+  folderId           String   @map("folder_id") @db.Uuid
+  originalName       String   @map("original_name") @db.VarChar(500)
+  fileType           FileType @map("file_type")
+  mimeType           String   @map("mime_type") @db.VarChar(150)
+  sizeBytes          BigInt   @map("size_bytes")
+  cloudinaryUrl      String   @map("cloudinary_url") @db.Text
+  cloudinaryPublicId String   @map("cloudinary_public_id") @db.Text
+  uploaderName       String   @map("uploader_name") @db.VarChar(255)
+  uploaderUnit       String?  @map("uploader_unit") @db.VarChar(255)
+  uploadedAt         DateTime @default(now()) @map("uploaded_at") @db.Timestamptz
+
+  folder             Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@index([folderId])
+  @@index([uploadedAt(sort: Desc)])
+  @@index([uploaderName])
+  @@map("files")
+}
